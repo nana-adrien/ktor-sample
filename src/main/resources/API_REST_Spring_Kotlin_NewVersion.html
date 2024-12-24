@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction à Spring Boot avec Kotlin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background: #007bff;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3, h4, h5 {
+            color: #007bff;
+        }
+        pre {
+            background: #f4f4f9;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background: #f4f4f9;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Comprendre Spring Boot avec Kotlin</h1>
+    </header>
+    <div class="container">
+        <h2>Introduction</h2>
+        <p>Spring Boot est un framework Java open-source basé sur Spring Framework. Grâce à Kotlin, vous bénéficiez de la concision et des fonctionnalités modernes du langage tout en exploitant la puissance de Spring Boot. L'objectif principal de Spring Boot est de permettre aux développeurs de créer des applications prêtes à l'emploi rapidement grâce à des configurations automatiques et une structure bien organisée.</p>
+
+        <h2>Prérequis pour démarrer</h2>
+        <ul>
+            <li>Kotlin Development Kit (KDK)</li>
+            <li>Un IDE comme IntelliJ IDEA ou Eclipse avec le plugin Kotlin</li>
+            <li>Outils de gestion des dépendances (Maven ou Gradle)</li>
+        </ul>
+
+        <h2>Comment fonctionne Spring Boot ?</h2>
+        <p>Spring Boot repose sur plusieurs concepts clés :</p>
+        <ul>
+            <li><strong>Starter Dependencies :</strong> Fournit des dépendances prêtes à l'emploi pour différents cas d'utilisation (par ex., Spring Web, Spring Data).</li>
+            <li><strong>Auto-Configuration :</strong> Configure automatiquement les composants en fonction des bibliothèques présentes dans le projet.</li>
+            <li><strong>Embedded Server :</strong> Intègre un serveur comme Tomcat ou Jetty pour exécuter les applications en tant qu'applications autonomes.</li>
+            <li><strong>Externalized Configuration :</strong> Permet de configurer l'application via des fichiers comme <code>application.properties</code> ou <code>application.yml</code>.</li>
+        </ul>
+
+        <h2>Créer un projet Spring Boot avec Kotlin</h2>
+        <ol>
+            <li>Visitez <a href="https://start.spring.io/">Spring Initializr</a>.</li>
+            <li>Sélectionnez les options suivantes :
+                <ul>
+                    <li><strong>Project :</strong> Maven ou Gradle</li>
+                    <li><strong>Language :</strong> Kotlin</li>
+                    <li><strong>Spring Boot Version :</strong> La dernière version stable</li>
+                    <li><strong>Dependencies :</strong> Laissez vide ou ajoutez des starters comme <code>Spring Web</code>.</li>
+                </ul>
+            </li>
+            <li>Générez et téléchargez le projet.</li>
+            <li>Importez le projet dans votre IDE.</li>
+        </ol>
+
+        <h2>Structure d'un projet Spring Boot</h2>
+        <p>Un projet Spring Boot suit une structure conventionnelle :</p>
+        <pre><code>src/main/kotlin
+├── com.example.demo
+    ├── DemoApplication.kt (Point d'entrée)
+    ├── config (Classes de configuration)
+    ├── service (Logique métier)
+    ├── repository (Accès aux données)
+    ├── model (Entités de domaine)
+</code></pre>
+
+        <h3>Fichier principal : DemoApplication.kt</h3>
+        <pre><code>package com.example.demo
+
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+
+@SpringBootApplication
+class DemoApplication
+
+fun main(args: Array<String>) {
+    runApplication<DemoApplication>(*args)
+}
+        </code></pre>
+        <p>Ce fichier contient la fonction <code>main</code>, qui démarre l'application en initialisant le contexte Spring.</p>
+
+        <h2>Configuration</h2>
+        <h3>Fichier <code>application.properties</code> ou <code>application.yml</code></h3>
+        <p>Ces fichiers permettent de configurer le comportement de l'application. Exemple :</p>
+        <pre><code># application.properties
+server.port=8081
+spring.application.name=DemoApplication
+        </code></pre>
+        <h3>Configurer avec des Beans</h3>
+        <pre><code>package com.example.demo.config
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+
+@Configuration
+class AppConfig {
+
+    @Bean
+    fun sampleBean(): String {
+        return "Ceci est un Bean personnalisé"
+    }
+}
+        </code></pre>
+
+        <h2>Concepts importants</h2>
+        <h3>Composants principaux</h3>
+        <ul>
+            <li><strong>@Component :</strong> Définit une classe comme un composant Spring.</li>
+            <li><strong>@Service :</strong> Spécifique aux classes contenant la logique métier.</li>
+            <li><strong>@Repository :</strong> Utilisé pour l'accès aux données.</li>
+            <li><strong>@Controller :</strong> Gère les interactions utilisateur dans les applications MVC.</li>
+        </ul>
+
+        <h3>Injection de dépendances</h3>
+        <p>Spring Boot utilise l'injection de dépendances pour gérer les objets et leurs relations :</p>
+        <pre><code>package com.example.demo.service
+
+import org.springframework.stereotype.Service
+
+@Service
+class SampleService {
+    fun getMessage(): String {
+        return "Message du service"
+    }
+}
+        </code></pre>
+
+        <p>Consommez ce service dans un contrôleur :</p>
+        <pre><code>package com.example.demo.controller
+
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RestController
+import com.example.demo.service.SampleService
+
+@RestController
+class SampleController(private val sampleService: SampleService) {
+
+    @GetMapping("/message")
+    fun getMessage(): String {
+        return sampleService.getMessage()
+    }
+}
+        </code></pre>
+
+        <h2>Spring Boot Actuator</h2>
+        <p>Actuator fournit des points de terminaison pour surveiller et gérer l'application. Ajoutez cette dépendance :</p>
+        <pre><code>implementation("org.springframework.boot:spring-boot-starter-actuator")</code></pre>
+        <p>Accédez à des informations système via <code>http://localhost:8080/actuator</code>.</p>
+
+        <h2>Tests dans Spring Boot</h2>
+        <p>Spring Boot facilite les tests unitaires et d'intégration :</p>
+        <pre><code>package com.example.demo
+
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class DemoApplicationTests {
+
+    @Test
+    fun contextLoads() {
+    }
+}
+        </code></pre>
+
+        <h2>Conclusion</h2>
+        <p>Ce guide fournit les bases pour comprendre le fonctionnement de Spring Boot avec Kotlin. Explorez les concepts plus avancés comme la sécurité, les transactions et l'intégration continue pour approfondir vos connaissances.</p>
+    </div>
+</body>
+</html>

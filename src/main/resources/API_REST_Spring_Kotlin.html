@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création d'une API REST avec Spring Boot et Kotlin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background: #007bff;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3, h4, h5 {
+            color: #007bff;
+        }
+        pre {
+            background: #f4f4f9;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background: #f4f4f9;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Création d'une API REST avec Spring Boot et Kotlin</h1>
+    </header>
+    <div class="container">
+        <h2>Prérequis</h2>
+        <p>Avant de commencer, assurez-vous d'avoir les outils suivants installés :</p>
+        <ul>
+            <li><a href="https://www.oracle.com/java/technologies/javase-downloads.html">JDK 17+</a></li>
+            <li><a href="https://gradle.org/install/">Gradle</a> ou <a href="https://maven.apache.org/">Maven</a></li>
+            <li><a href="https://www.jetbrains.com/idea/download/">IntelliJ IDEA</a> (recommandé pour Kotlin)</li>
+            <li><a href="https://www.postman.com/">Postman</a> ou un outil similaire pour tester l'API</li>
+        </ul>
+
+        <h2>Initialisation du projet Spring Boot</h2>
+        <p>1. <strong>Génération du projet</strong> : Rendez-vous sur <a href="https://start.spring.io/">Spring Initializr</a> et configurez votre projet :</p>
+        <ul>
+            <li>Language : Kotlin</li>
+            <li>Build : Gradle (Kotlin DSL) ou Maven</li>
+            <li>Dépendances :</li>
+            <ul>
+                <li>Spring Web</li>
+                <li>Spring Data JPA</li>
+                <li>Spring Security</li>
+                <li>H2 Database (ou une autre base de données de votre choix)</li>
+                <li>Spring Boot DevTools (facultatif, pour le développement local)</li>
+                <li>OpenAPI (Swagger) pour la documentation</li>
+            </ul>
+        </ul>
+        <p>2. <strong>Importez le projet</strong> dans IntelliJ IDEA.</p>
+
+        <h2>Configuration de base</h2>
+        <p>Ajoutez les configurations suivantes dans le fichier <code>application.yml</code> :</p>
+        <pre><code>server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+        </code></pre>
+
+        <h2>Structure du projet</h2>
+        <p>Organisez votre projet comme suit :</p>
+        <pre><code>src/main/kotlin
+├── com.example.api
+    ├── controller
+    ├── service
+    ├── repository
+    ├── model
+    ├── dto
+        </code></pre>
+
+        <h2>Création des entités</h2>
+        <p>Voici un exemple d'entité :</p>
+        <pre><code>package com.example.api.model
+
+import jakarta.persistence.*
+
+@Entity
+data class User(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+    val name: String,
+    val email: String,
+    val password: String
+)
+        </code></pre>
+
+        <h2>Création du Repository</h2>
+        <p>Créez une interface pour accéder à la base de données :</p>
+        <pre><code>package com.example.api.repository
+
+import com.example.api.model.User
+import org.springframework.data.jpa.repository.JpaRepository
+
+interface UserRepository : JpaRepository<User, Long>
+        </code></pre>
+
+        <h2>Création du Service</h2>
+        <p>Ajoutez une couche service pour gérer la logique métier :</p>
+        <pre><code>package com.example.api.service
+
+import com.example.api.model.User
+import com.example.api.repository.UserRepository
+import org.springframework.stereotype.Service
+
+@Service
+class UserService(private val userRepository: UserRepository) {
+    fun getAllUsers(): List<User> = userRepository.findAll()
+
+    fun getUserById(id: Long): User =
+        userRepository.findById(id).orElseThrow { RuntimeException("User not found") }
+
+    fun createUser(user: User): User = userRepository.save(user)
+
+    fun deleteUser(id: Long) = userRepository.deleteById(id)
+}
+        </code></pre>
+
+        <h2>Création du Controller</h2>
+        <p>Exposez les endpoints via un contrôleur :</p>
+        <pre><code>package com.example.api.controller
+
+import com.example.api.model.User
+import com.example.api.service.UserService
+import org.springframework.web.bind.annotation.*
+
+@RestController
+@RequestMapping("/api/users")
+class UserController(private val userService: UserService) {
+
+    @GetMapping
+    fun getAllUsers(): List<User> = userService.getAllUsers()
+
+    @GetMapping("/{id}")
+    fun getUserById(@PathVariable id: Long): User = userService.getUserById(id)
+
+    @PostMapping
+    fun createUser(@RequestBody user: User): User = userService.createUser(user)
+
+    @DeleteMapping("/{id}")
+    fun deleteUser(@PathVariable id: Long) = userService.deleteUser(id)
+}
+        </code></pre>
+
+        <h2>Documentation avec Swagger</h2>
+        <p>Ajoutez Swagger pour documenter votre API. Ajoutez la dépendance suivante dans le fichier <code>build.gradle.kts</code> :</p>
+        <pre><code>implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+        </code></pre>
+        <p>Accédez à l'interface Swagger sur <code>http://localhost:8080/swagger-ui.html</code>.</p>
+
+        <h2>Sécurisation de l'API</h2>
+        <p>Ajoutez Spring Security et configurez la sécurité dans une classe :</p>
+        <pre><code>package com.example.api.config
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.web.SecurityFilterChain
+
+@Configuration
+class SecurityConfig {
+
+    @Bean
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http.csrf().disable()
+            .authorizeRequests()
+            .antMatchers("/api/**").permitAll()
+            .anyRequest().authenticated()
+        return http.build()
+    }
+}
+        </code></pre>
+
+        <h2>Tests</h2>
+        <p>Ajoutez des tests unitaires et d'intégration pour valider votre API :</p>
+        <pre><code>package com.example.api
+
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class ApiApplicationTests {
+    @Test
+    fun contextLoads() {
+    }
+}
+        </code></pre>
+
+        <h2>Déploiement</h2>
+        <p>Utilisez Docker ou Heroku pour déployer votre API en production.</p>
+
+        <p>Et voilà ! Votre API REST est prête. 🎉</p>
+    </div>
+</body>
+</html>
